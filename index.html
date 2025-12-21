@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Windows 95</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'MS Sans Serif', Arial, sans-serif;
+      background: #008080;
+      overflow: hidden;
+      height: 100vh;
+      cursor: default;
+      user-select: none;
+    }
+
+    .desktop {
+      height: calc(100vh - 28px);
+      padding: 10px;
+      position: relative;
+    }
+
+    .icon {
+      width: 70px;
+      text-align: center;
+      margin: 10px;
+      cursor: pointer;
+      position: absolute;
+    }
+
+    .icon img {
+      width: 32px;
+      height: 32px;
+      margin-bottom: 4px;
+    }
+
+    .icon-label {
+      color: white;
+      font-size: 11px;
+      text-shadow: 1px 1px 1px black;
+      padding: 2px;
+      word-wrap: break-word;
+    }
+
+    .icon.selected .icon-label {
+      background: #000080;
+      outline: 1px dotted white;
+    }
+
+    .window {
+      position: absolute;
+      background: #c0c0c0;
+      border: 2px solid;
+      border-color: #dfdfdf #808080 #808080 #dfdfdf;
+      min-width: 300px;
+      min-height: 200px;
+      display: none;
+      box-shadow: 2px 2px 0 rgba(0,0,0,0.3);
+    }
+
+    .window.active {
+      display: block;
+      z-index: 1000;
+    }
+
+    .title-bar {
+      background: linear-gradient(to right, #000080, #1084d0);
+      color: white;
+      padding: 3px 4px;
+      font-weight: bold;
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: move;
+    }
+
+    .title-text {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .title-buttons {
+      display: flex;
+      gap: 2px;
+    }
+
+    .title-button {
+      width: 16px;
+      height: 14px;
+      background: #c0c0c0;
+      border: 1px solid;
+      border-color: #ffffff #000000 #000000 #ffffff;
+      font-size: 10px;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: black;
+    }
+
+    .title-button:active {
+      border-color: #000000 #ffffff #ffffff #000000;
+    }
+
+    .window-content {
+      padding: 10px;
+      background: white;
+      height: calc(100% - 24px);
+      overflow: auto;
+    }
+
+    .taskbar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 28px;
+      background: #c0c0c0;
+      border-top: 2px solid;
+      border-color: #dfdfdf #808080;
+      display: flex;
+      align-items: center;
+      padding: 2px;
+      gap: 2px;
+    }
+
+    .start-button {
+      height: 24px;
+      padding: 0 8px;
+      background: #c0c0c0;
+      border: 2px solid;
+      border-color: #ffffff #000000 #000000 #ffffff;
+      font-weight: bold;
+      font-size: 11px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .start-button:active, .start-button.pressed {
+      border-color: #000000 #ffffff #ffffff #000000;
+      padding: 1px 7px 0 9px;
+    }
+
+    .start-logo {
+      width: 16px;
+      height: 16px;
+      background: linear-gradient(45deg, #ff0000, #ffff00);
+      border: 1px solid black;
+    }
+
+    .start-menu {
+      position: absolute;
+      bottom: 28px;
+      left: 2px;
+      width: 200px;
+      background: #c0c0c0;
+      border: 2px solid;
+      border-color: #dfdfdf #808080 #808080 #dfdfdf;
+      display: none;
+      box-shadow: 2px 2px 0 rgba(0,0,0,0.3);
+    }
+
+    .start-menu.active {
+      display: block;
+    }
+
+    .start-menu-header {
+      background: linear-gradient(to bottom, #000080, #1084d0);
+      color: white;
+      padding: 20px 8px;
+      font-size: 20px;
+      font-weight: bold;
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      float: left;
+    }
+
+    .start-menu-items {
+      margin-left: 30px;
+      padding: 2px;
+    }
+
+    .start-menu-item {
+      padding: 4px 20px 4px 8px;
+      font-size: 11px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .start-menu-item:hover {
+      background: #000080;
+      color: white;
+    }
+
+    .taskbar-button {
+      height: 24px;
+      padding: 0 8px;
+      background: #c0c0c0;
+      border: 2px solid;
+      border-color: #ffffff #000000 #000000 #ffffff;
+      font-size: 11px;
+      cursor: pointer;
+      max-width: 150px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .taskbar-button.active {
+      border-color: #000000 #ffffff #ffffff #000000;
+      padding: 1px 7px 0 9px;
+    }
+
+    .clock {
+      margin-left: auto;
+      padding: 0 8px;
+      height: 24px;
+      border: 1px solid;
+      border-color: #808080 #dfdfdf #dfdfdf #808080;
+      display: flex;
+      align-items: center;
+      font-size: 11px;
+    }
+
+    .folder-item {
+      padding: 2px 4px;
+      margin: 2px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .folder-item:hover {
+      background: #000080;
+      color: white;
+    }
+
+    .folder-icon {
+      width: 16px;
+      height: 16px;
+      background: #ffff00;
+      border: 1px solid #808080;
+    }
+
+    .notepad-content {
+      width: 100%;
+      height: 100%;
+      border: none;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      resize: none;
+      outline: none;
+      padding: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="desktop" id="desktop">
+    <div class="icon" style="top: 10px; left: 10px;" data-type="folder" data-name="Mój komputer">
+      <div style="width:32px;height:32px;background:#808080;margin:0 auto 4px;border:1px solid #000;"></div>
+      <div class="icon-label">Mój komputer</div>
+    </div>
+    
+    <div class="icon" style="top: 100px; left: 10px;" data-type="folder" data-name="Moje dokumenty">
+      <div style="width:32px;height:32px;background:#ffff00;margin:0 auto 4px;border:1px solid #000;"></div>
+      <div class="icon-label">Moje dokumenty</div>
+    </div>
+    
+    <div class="icon" style="top: 190px; left: 10px;" data-type="notepad" data-name="Notatnik">
+      <div style="width:32px;height:32px;background:#ffffff;margin:0 auto 4px;border:1px solid #000;"></div>
+      <div class="icon-label">Notatnik.txt</div>
+    </div>
+
+    <div class="icon" style="top: 280px; left: 10px;" data-type="trash" data-name="Kosz">
+      <div style="width:32px;height:32px;background:#c0c0c0;margin:0 auto 4px;border:1px solid #000;"></div>
+      <div class="icon-label">Kosz</div>
+    </div>
+  </div>
+
+  <div class="window" id="myComputer">
+    <div class="title-bar">
+      <div class="title-text">
+        <span>📁</span>
+        <span>Mój komputer</span>
+      </div>
+      <div class="title-buttons">
+        <div class="title-button minimize">_</div>
+        <div class="title-button maximize">□</div>
+        <div class="title-button close">×</div>
+      </div>
+    </div>
+    <div class="window-content">
+      <div class="folder-item">
+        <div class="folder-icon"></div>
+        <span>Dysk C:</span>
+      </div>
+      <div class="folder-item">
+        <div class="folder-icon"></div>
+        <span>Dysk D:</span>
+      </div>
+      <div class="folder-item">
+        <div class="folder-icon"></div>
+        <span>Panel sterowania</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="window" id="myDocuments">
+    <div class="title-bar">
+      <div class="title-text">
+        <span>📁</span>
+        <span>Moje dokumenty</span>
+      </div>
+      <div class="title-buttons">
+        <div class="title-button minimize">_</div>
+        <div class="title-button maximize">□</div>
+        <div class="title-button close">×</div>
+      </div>
+    </div>
+    <div class="window-content">
+      <div class="folder-item">
+        <div style="width:16px;height:16px;background:#fff;border:1px solid #000;"></div>
+        <span>Dokument1.txt</span>
+      </div>
+      <div class="folder-item">
+        <div style="width:16px;height:16px;background:#fff;border:1px solid #000;"></div>
+        <span>Projekt.doc</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="window" id="notepad">
+    <div class="title-bar">
+      <div class="title-text">
+        <span>📝</span>
+        <span>Notatnik - Notatnik.txt</span>
+      </div>
+      <div class="title-buttons">
+        <div class="title-button minimize">_</div>
+        <div class="title-button maximize">□</div>
+        <div class="title-button close">×</div>
+      </div>
+    </div>
+    <div class="window-content" style="padding:0;">
+      <textarea class="notepad-content" placeholder="Wpisz tekst...">Witaj w Windows 95!
+
+To jest Notatnik - prosty edytor tekstu.
+Możesz pisać tutaj swoje notatki.</textarea>
+    </div>
+  </div>
+
+  <div class="window" id="trash">
+    <div class="title-bar">
+      <div class="title-text">
+        <span>🗑️</span>
+        <span>Kosz</span>
+      </div>
+      <div class="title-buttons">
+        <div class="title-button minimize">_</div>
+        <div class="title-button maximize">□</div>
+        <div class="title-button close">×</div>
+      </div>
+    </div>
+    <div class="window-content">
+      <p style="color:#808080;font-size:11px;">Kosz jest pusty.</p>
+    </div>
+  </div>
+
+  <div class="taskbar">
+    <div class="start-button" id="startButton">
+      <div class="start-logo"></div>
+      <span>Start</span>
+    </div>
+    <div id="taskbarButtons"></div>
+    <div class="clock" id="clock">12:00</div>
+  </div>
+
+  <div class="start-menu" id="startMenu">
+    <div class="start-menu-header">Windows 95</div>
+    <div class="start-menu-items">
+      <div class="start-menu-item" data-action="programs">
+        <span>📁</span>
+        <span>Programy</span>
+      </div>
+      <div class="start-menu-item" data-action="documents">
+        <span>📄</span>
+        <span>Dokumenty</span>
+      </div>
+      <div class="start-menu-item" data-action="settings">
+        <span>⚙️</span>
+        <span>Ustawienia</span>
+      </div>
+      <div class="start-menu-item" data-action="find">
+        <span>🔍</span>
+        <span>Znajdź</span>
+      </div>
+      <hr style="margin:2px 0;">
+      <div class="start-menu-item" data-action="shutdown">
+        <span>🔌</span>
+        <span>Zamknij system</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let zIndex = 1000;
+    let activeWindow = null;
+    let dragElement = null;
+    let dragOffsetX = 0;
+    let dragOffsetY = 0;
+
+    // Zegar
+    function updateClock() {
+      const now = new Date();
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      document.getElementById('clock').textContent = `${hours}:${minutes}`;
+    }
+    updateClock();
+    setInterval(updateClock, 1000);
+
+    // Menu Start
+    const startButton = document.getElementById('startButton');
+    const startMenu = document.getElementById('startMenu');
+
+    startButton.addEventListener('click', (e) => {
+      e.stopPropagation();
+      startMenu.classList.toggle('active');
+      startButton.classList.toggle('pressed');
+    });
+
+    document.addEventListener('click', () => {
+      startMenu.classList.remove('active');
+      startButton.classList.remove('pressed');
+    });
+
+    startMenu.addEventListener('click', (e) => {
+      e.stopPropagation();
+    });
+
+    // Ikony na pulpicie
+    const icons = document.querySelectorAll('.icon');
+    icons.forEach(icon => {
+      icon.addEventListener('click', (e) => {
+        e.stopPropagation();
+        document.querySelectorAll('.icon').forEach(i => i.classList.remove('selected'));
+        icon.classList.add('selected');
+      });
+
+      icon.addEventListener('dblclick', () => {
+        const type = icon.dataset.type;
+        const name = icon.dataset.name;
+        
+        if (type === 'folder') {
+          if (name === 'Mój komputer') {
+            openWindow('myComputer');
+          } else if (name === 'Moje dokumenty') {
+            openWindow('myDocuments');
+          }
+        } else if (type === 'notepad') {
+          openWindow('notepad');
+        } else if (type === 'trash') {
+          openWindow('trash');
+        }
+      });
+    });
+
+    // Odznaczanie ikon
+    document.getElementById('desktop').addEventListener('click', () => {
+      document.querySelectorAll('.icon').forEach(i => i.classList.remove('selected'));
+    });
+
+    // Okna
+    function openWindow(windowId) {
+      const win = document.getElementById(windowId);
+      win.classList.add('active');
+      win.style.zIndex = ++zIndex;
+      activeWindow = win;
+      
+      // Centruj okno jeśli nie ma pozycji
+      if (!win.style.left) {
+        win.style.left = '100px';
+        win.style.top = '80px';
+        win.style.width = '400px';
+        win.style.height = '300px';
+      }
+    }
+
+    // Przyciski okien
+    document.querySelectorAll('.window').forEach(win => {
+      const titleBar = win.querySelector('.title-bar');
+      const closeBtn = win.querySelector('.close');
+      const minimizeBtn = win.querySelector('.minimize');
+      const maximizeBtn = win.querySelector('.maximize');
+
+      closeBtn.addEventListener('click', () => {
+        win.classList.remove('active');
+      });
+
+      minimizeBtn.addEventListener('click', () => {
+        win.classList.remove('active');
+      });
+
+      let isMaximized = false;
+      let prevPosition = {};
+
+      maximizeBtn.addEventListener('click', () => {
+        if (!isMaximized) {
+          prevPosition = {
+            left: win.style.left,
+            top: win.style.top,
+            width: win.style.width,
+            height: win.style.height
+          };
+          win.style.left = '0';
+          win.style.top = '0';
+          win.style.width = '100vw';
+          win.style.height = 'calc(100vh - 28px)';
+          isMaximized = true;
+        } else {
+          win.style.left = prevPosition.left;
+          win.style.top = prevPosition.top;
+          win.style.width = prevPosition.width;
+          win.style.height = prevPosition.height;
+          isMaximized = false;
+        }
+      });
+
+      // Przeciąganie okien
+      titleBar.addEventListener('mousedown', (e) => {
+        if (e.target.classList.contains('title-button')) return;
+        
+        dragElement = win;
+        win.style.zIndex = ++zIndex;
+        activeWindow = win;
+        
+        dragOffsetX = e.clientX - win.offsetLeft;
+        dragOffsetY = e.clientY - win.offsetTop;
+        
+        e.preventDefault();
+      });
+
+      // Kliknięcie aktywuje okno
+      win.addEventListener('mousedown', () => {
+        win.style.zIndex = ++zIndex;
+        activeWindow = win;
+      });
+    });
+
+    document.addEventListener('mousemove', (e) => {
+      if (dragElement) {
+        const x = e.clientX - dragOffsetX;
+        const y = e.clientY - dragOffsetY;
+        
+        dragElement.style.left = Math.max(0, Math.min(x, window.innerWidth - 100)) + 'px';
+        dragElement.style.top = Math.max(0, Math.min(y, window.innerHeight - 100)) + 'px';
+      }
+    });
+
+    document.addEventListener('mouseup', () => {
+      dragElement = null;
+    });
+
+    // Menu Start - akcje
+    document.querySelectorAll('.start-menu-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const action = item.dataset.action;
+        
+        if (action === 'programs') {
+          openWindow('myComputer');
+        } else if (action === 'documents') {
+          openWindow('myDocuments');
+        } else if (action === 'shutdown') {
+          if (confirm('Czy na pewno chcesz zamknąć system?')) {
+            document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#000;color:#fff;font-size:24px;">System został zamknięty. Możesz teraz bezpiecznie wyłączyć komputer.</div>';
+          }
+        }
+        
+        startMenu.classList.remove('active');
+        startButton.classList.remove('pressed');
+      });
+    });
+  </script>
+</body>
+</html>
